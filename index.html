@@ -391,6 +391,80 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); disp
 .signup-link span { color: var(--accent); cursor: pointer; font-weight: 500; }
 .signup-link span:hover { text-decoration: underline; }
 
+/* ── SETTINGS TABS ── */
+.stab {
+  flex: 1; padding: 7px 6px; border-radius: 8px; background: none; border: none;
+  font-family: var(--font); font-size: 12px; font-weight: 500; color: var(--text-muted);
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.stab:hover { color: var(--text); }
+.stab.active { background: var(--surface2); color: var(--text); font-weight: 600; }
+
+/* Theme picker */
+.theme-opt {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: none; border: 2px solid var(--border); border-radius: 10px; padding: 8px;
+  cursor: pointer; transition: all 0.15s; font-family: var(--font); color: var(--text-muted); font-size: 11.5px;
+}
+.theme-opt:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+.theme-opt.active { border-color: var(--accent); color: var(--text); }
+.theme-preview {
+  width: 100%; height: 38px; border-radius: 6px; border: 1px solid; overflow: hidden;
+  display: flex;
+}
+
+/* Accent picker */
+.accent-opt {
+  width: 28px; height: 28px; border-radius: 50%; border: 3px solid transparent;
+  cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+}
+.accent-opt:hover { transform: scale(1.15); }
+.accent-opt.active { border-color: white; box-shadow: 0 0 0 1px rgba(255,255,255,0.3); }
+
+/* Size / width buttons */
+.size-opt {
+  flex: 1; padding: 8px 10px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border);
+  font-family: var(--font); font-size: 12.5px; font-weight: 500; color: var(--text-muted); cursor: pointer;
+  transition: all 0.15s;
+}
+.size-opt:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+.size-opt.active { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent); font-weight: 600; }
+
+/* Toggle switch */
+.toggle-row { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+.toggle-row input[type=checkbox] { display: none; }
+.toggle-track {
+  width: 38px; height: 22px; border-radius: 11px; background: var(--surface2);
+  border: 1px solid var(--border); flex-shrink: 0; position: relative; transition: all 0.2s; cursor: pointer;
+}
+.toggle-row input:checked + .toggle-track { background: var(--accent); border-color: var(--accent); }
+.toggle-thumb {
+  position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+  border-radius: 50%; background: white; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.toggle-row input:checked + .toggle-track .toggle-thumb { transform: translateX(16px); }
+.toggle-label { font-size: 13px; color: var(--text-muted); }
+
+/* Light theme overrides */
+body.theme-light {
+  --bg: #f4f5f7; --sidebar: #eaecef; --sidebar-hover: #dde0e4;
+  --surface: #ffffff; --surface2: #f0f1f3;
+  --border: rgba(0,0,0,0.08); --border-light: rgba(0,0,0,0.05);
+  --text: #111316; --text-muted: #5a6270; --text-dim: #9099a6;
+  --user-bubble: #e4e7eb; --input-bg: #eaecef; --input-border: rgba(0,0,0,0.1);
+  --scrollbar: #c8cdd4;
+}
+body.theme-midnight {
+  --bg: #0d0f14; --sidebar: #080a10; --sidebar-hover: #10131b;
+  --surface: #131720; --surface2: #181c26;
+  --border: rgba(255,255,255,0.05); --border-light: rgba(255,255,255,0.03);
+  --user-bubble: #10131b; --input-bg: #080a10;
+}
+
+/* Compact sidebar */
+body.compact-sidebar .chat-item { padding: 5px 10px; }
+body.compact-sidebar .folder-header { padding: 5px 10px; }
+
 /* Voice session ended toast */
 #voice-toast {
   position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(10px);
@@ -577,33 +651,179 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); disp
 
 <!-- SETTINGS MODAL -->
 <div id="settings-overlay" class="modal-overlay" onclick="if(event.target.id==='settings-overlay')closeSettings()">
-  <div class="modal-box">
-    <h2>Settings</h2>
-    <div class="modal-scroll">
-      <div class="sgroup">
-        <label>AI Name</label>
-        <input id="s-name" type="text" placeholder="Amber" maxlength="24" />
-      </div>
-      <div class="sgroup">
-        <label>Wake phrase</label>
-        <input id="s-wake" type="text" placeholder="Hey Amber" maxlength="50" />
-        <span class="hint">Say this out loud to activate voice mode</span>
-      </div>
-      <div class="sgroup">
-        <label>Personality</label>
-        <textarea id="s-persona" rows="4" placeholder="Sharp, direct, warm AI assistant…"></textarea>
-      </div>
-      <div class="sgroup">
-        <label>Voice</label>
-        <select id="s-voice"><option value="">Default</option></select>
-      </div>
-      <div class="sgroup">
-        <label>Past chats</label>
-        <button class="mbtn mbtn-ghost" onclick="exportChats()" style="width:100%;text-align:center;">Export conversation history</button>
-      </div>
+  <div class="modal-box" style="width:520px;max-width:100%;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-shrink:0;">
+      <h2 style="margin:0;">Settings</h2>
+      <button onclick="closeSettings()" style="background:none;border:none;cursor:pointer;color:var(--text-dim);padding:4px;border-radius:6px;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
+    <!-- Tabs -->
+    <div style="display:flex;gap:2px;background:var(--surface);border-radius:10px;padding:3px;margin-bottom:20px;flex-shrink:0;" id="settings-tabs">
+      <button class="stab active" onclick="switchSettingsTab('appearance')">🎨 Appearance</button>
+      <button class="stab" onclick="switchSettingsTab('chat')">💬 Chat</button>
+      <button class="stab" onclick="switchSettingsTab('voice')">🎤 Voice</button>
+      <button class="stab" onclick="switchSettingsTab('data')">🗂 Data</button>
+    </div>
+
+    <div class="modal-scroll" style="gap:14px;">
+
+      <!-- APPEARANCE TAB -->
+      <div id="stab-appearance" class="stab-panel">
+        <div class="sgroup">
+          <label>Theme</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;" id="theme-picker">
+            <button class="theme-opt active" data-theme="dark" onclick="applyTheme('dark',this)">
+              <div class="theme-preview" style="background:#18191c;border-color:#333;"><div style="width:40%;height:100%;background:#111214;border-right:1px solid #333;"></div></div>
+              <span>Dark</span>
+            </button>
+            <button class="theme-opt" data-theme="midnight" onclick="applyTheme('midnight',this)">
+              <div class="theme-preview" style="background:#0d0f14;border-color:#1a1d27;"><div style="width:40%;height:100%;background:#080a10;border-right:1px solid #1a1d27;"></div></div>
+              <span>Midnight</span>
+            </button>
+            <button class="theme-opt" data-theme="light" onclick="applyTheme('light',this)">
+              <div class="theme-preview" style="background:#f5f5f5;border-color:#ddd;"><div style="width:40%;height:100%;background:#ebebeb;border-right:1px solid #ddd;"></div></div>
+              <span>Light</span>
+            </button>
+          </div>
+        </div>
+        <div class="sgroup">
+          <label>Accent color</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="accent-picker">
+            <button class="accent-opt active" data-color="#e8a44a" onclick="applyAccent('#e8a44a',this)" style="background:#e8a44a;" title="Amber"></button>
+            <button class="accent-opt" data-color="#7c6aff" onclick="applyAccent('#7c6aff',this)" style="background:#7c6aff;" title="Violet"></button>
+            <button class="accent-opt" data-color="#3b9eff" onclick="applyAccent('#3b9eff',this)" style="background:#3b9eff;" title="Blue"></button>
+            <button class="accent-opt" data-color="#3ecf8e" onclick="applyAccent('#3ecf8e',this)" style="background:#3ecf8e;" title="Mint"></button>
+            <button class="accent-opt" data-color="#f06292" onclick="applyAccent('#f06292',this)" style="background:#f06292;" title="Pink"></button>
+            <button class="accent-opt" data-color="#ff6b6b" onclick="applyAccent('#ff6b6b',this)" style="background:#ff6b6b;" title="Red"></button>
+            <button class="accent-opt" data-color="#a8e063" onclick="applyAccent('#a8e063',this)" style="background:#a8e063;" title="Lime"></button>
+          </div>
+        </div>
+        <div class="sgroup">
+          <label>Font size</label>
+          <div style="display:flex;gap:8px;">
+            <button class="size-opt" data-size="13" onclick="applyFontSize(13,this)">Small</button>
+            <button class="size-opt active" data-size="15" onclick="applyFontSize(15,this)">Medium</button>
+            <button class="size-opt" data-size="17" onclick="applyFontSize(17,this)">Large</button>
+          </div>
+        </div>
+        <div class="sgroup">
+          <label>Message width</label>
+          <div style="display:flex;gap:8px;">
+            <button class="size-opt" data-width="600" onclick="applyMsgWidth(600,this)">Narrow</button>
+            <button class="size-opt active" data-width="780" onclick="applyMsgWidth(780,this)">Default</button>
+            <button class="size-opt" data-width="980" onclick="applyMsgWidth(980,this)">Wide</button>
+          </div>
+        </div>
+        <div class="sgroup">
+          <label>Show timestamps</label>
+          <label class="toggle-row">
+            <input type="checkbox" id="s-timestamps" onchange="applyTimestamps(this.checked)" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">Show time on each message</span>
+          </label>
+        </div>
+        <div class="sgroup">
+          <label>Compact sidebar</label>
+          <label class="toggle-row">
+            <input type="checkbox" id="s-compact" onchange="applyCompact(this.checked)" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">Tighter spacing in chat list</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- CHAT TAB -->
+      <div id="stab-chat" class="stab-panel" style="display:none;">
+        <div class="sgroup">
+          <label>AI Name</label>
+          <input id="s-name" type="text" placeholder="Amber" maxlength="24" />
+          <span class="hint">Changes the name shown in the sidebar and messages</span>
+        </div>
+        <div class="sgroup">
+          <label>Personality</label>
+          <textarea id="s-persona" rows="4" placeholder="Sharp, direct, warm AI assistant…"></textarea>
+          <span class="hint">Sets how Amber responds — tone, style, focus</span>
+        </div>
+        <div class="sgroup">
+          <label>Typing speed</label>
+          <div style="display:flex;gap:8px;">
+            <button class="size-opt" data-speed="2" onclick="applyTypingSpeed(2,this)">Fast</button>
+            <button class="size-opt active" data-speed="12" onclick="applyTypingSpeed(12,this)">Normal</button>
+            <button class="size-opt" data-speed="30" onclick="applyTypingSpeed(30,this)">Slow</button>
+          </div>
+          <span class="hint">How fast Amber types out her response</span>
+        </div>
+        <div class="sgroup">
+          <label>Enter to send</label>
+          <label class="toggle-row">
+            <input type="checkbox" id="s-enter" checked onchange="applyEnterSend(this.checked)" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">Press Enter to send (Shift+Enter for newline)</span>
+          </label>
+        </div>
+        <div class="sgroup">
+          <label>Show sender label</label>
+          <label class="toggle-row">
+            <input type="checkbox" id="s-labels" checked onchange="applySenderLabels(this.checked)" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">Show "Amber" above AI responses</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- VOICE TAB -->
+      <div id="stab-voice" class="stab-panel" style="display:none;">
+        <div class="sgroup">
+          <label>Wake phrase</label>
+          <input id="s-wake" type="text" placeholder="Hey Amber" maxlength="50" />
+          <span class="hint">Say this out loud to activate voice mode</span>
+        </div>
+        <div class="sgroup">
+          <label>Voice</label>
+          <select id="s-voice"><option value="">Default (system)</option></select>
+        </div>
+        <div class="sgroup">
+          <label>Speech rate</label>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="range" id="s-speech-rate" min="0.5" max="2" step="0.1" value="1" style="flex:1;accent-color:var(--accent);" oninput="document.getElementById('rate-val').textContent=parseFloat(this.value).toFixed(1)+'×'" />
+            <span id="rate-val" style="font-size:12px;color:var(--text-muted);min-width:30px;">1.0×</span>
+          </div>
+        </div>
+        <div class="sgroup">
+          <label>Auto-reply with voice</label>
+          <label class="toggle-row">
+            <input type="checkbox" id="s-autovoice" checked />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">Amber speaks her replies during voice sessions</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- DATA TAB -->
+      <div id="stab-data" class="stab-panel" style="display:none;">
+        <div class="sgroup">
+          <label>Conversations</label>
+          <button class="mbtn mbtn-ghost" onclick="exportChats()" style="width:100%;text-align:center;">⬇ Export chat history (JSON)</button>
+        </div>
+        <div class="sgroup">
+          <label>Clear data</label>
+          <button class="mbtn" onclick="clearAllChats()" style="width:100%;text-align:center;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);color:#f87171;font-family:var(--font);font-size:13.5px;font-weight:600;padding:11px;border-radius:10px;cursor:pointer;">🗑 Clear all conversations</button>
+        </div>
+        <div class="sgroup">
+          <label>Reset settings</label>
+          <button class="mbtn mbtn-ghost" onclick="resetSettings()" style="width:100%;text-align:center;">↺ Reset to defaults</button>
+        </div>
+        <div style="margin-top:8px;padding:12px 14px;background:var(--surface);border-radius:10px;border:1px solid var(--border);">
+          <div style="font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Storage usage</div>
+          <div style="font-size:13px;color:var(--text-muted);" id="storage-info">Calculating…</div>
+        </div>
+      </div>
+
+    </div><!-- end modal-scroll -->
+
     <div class="modal-btns">
-      <button class="mbtn mbtn-ghost" onclick="closeSettings()">Cancel</button>
+      <button class="mbtn mbtn-ghost" onclick="closeSettings()">Close</button>
       <button class="mbtn mbtn-primary" onclick="doSaveSettings()">Save</button>
     </div>
   </div>
@@ -1303,36 +1523,221 @@ function closeSidebar() {
   document.getElementById('sidebar-overlay').classList.remove('open');
 }
 
-// ── SETTINGS ────────────────────────────────────────────────────────────────
+// ── SETTINGS STATE ──────────────────────────────────────────────────────────
+let currentTheme   = 'dark';
+let currentAccent  = '#e8a44a';
+let currentFontSz  = 15;
+let currentMsgW    = 780;
+let showTimestamps = false;
+let compactSidebar = false;
+let enterToSend    = true;
+let showLabels     = true;
+let typingSpeed    = 12;
+let speechRate     = 1.0;
+let autoVoice      = true;
+
+function switchSettingsTab(tab) {
+  document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.stab-panel').forEach(p => p.style.display = 'none');
+  document.querySelector(`.stab[onclick*="${tab}"]`).classList.add('active');
+  document.getElementById('stab-' + tab).style.display = 'flex';
+  document.getElementById('stab-' + tab).style.flexDirection = 'column';
+  document.getElementById('stab-' + tab).style.gap = '14px';
+  if (tab === 'data') updateStorageInfo();
+}
+
+// Theme
+function applyTheme(theme, btn) {
+  currentTheme = theme;
+  document.querySelectorAll('.theme-opt').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.body.classList.remove('theme-light','theme-midnight');
+  if (theme === 'light') document.body.classList.add('theme-light');
+  else if (theme === 'midnight') document.body.classList.add('theme-midnight');
+}
+
+// Accent color
+function applyAccent(color, btn) {
+  currentAccent = color;
+  document.querySelectorAll('.accent-opt').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const r = document.documentElement;
+  r.style.setProperty('--accent', color);
+  // derive dim/border from color
+  r.style.setProperty('--accent-dim', color + '18');
+  r.style.setProperty('--accent-border', color + '44');
+  r.style.setProperty('--accent-glow', color + '26');
+  // update logo polygons
+  document.querySelectorAll('#logo-svg polygon, #welcome-logo polygon').forEach((p,i) => {
+    if (i % 3 !== 2) p.setAttribute('fill', color);
+  });
+  document.querySelectorAll('.ai-icon svg polygon').forEach(p => p.setAttribute('fill', color));
+}
+
+// Font size
+function applyFontSize(size, btn) {
+  currentFontSz = size;
+  document.querySelectorAll('.size-opt[data-size]').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.msg-row.ai .bubble').forEach(b => b.style.fontSize = size + 'px');
+  document.querySelectorAll('.msg-row.user .bubble').forEach(b => b.style.fontSize = (size - 1) + 'px');
+  // persist for future messages via CSS var
+  document.documentElement.style.setProperty('--msg-font-size', size + 'px');
+}
+
+// Message width
+function applyMsgWidth(width, btn) {
+  currentMsgW = width;
+  document.querySelectorAll('.size-opt[data-width]').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.documentElement.style.setProperty('--msg-max-width', width + 'px');
+  // apply to existing rows
+  document.querySelectorAll('.msg-row').forEach(r => r.style.maxWidth = width + 'px');
+}
+
+// Timestamps
+function applyTimestamps(on) {
+  showTimestamps = on;
+  document.querySelectorAll('.msg-timestamp').forEach(t => t.style.display = on ? 'block' : 'none');
+}
+
+// Compact sidebar
+function applyCompact(on) {
+  compactSidebar = on;
+  document.body.classList.toggle('compact-sidebar', on);
+}
+
+// Enter to send
+function applyEnterSend(on) { enterToSend = on; }
+
+// Sender labels
+function applySenderLabels(on) {
+  showLabels = on;
+  document.querySelectorAll('.ai-sender-label').forEach(l => l.style.display = on ? 'block' : 'none');
+}
+
+// Typing speed
+function applyTypingSpeed(speed, btn) {
+  typingSpeed = speed;
+  document.querySelectorAll('.size-opt[data-speed]').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+// Storage info
+function updateStorageInfo() {
+  try {
+    let total = 0;
+    for (let k in localStorage) { if (k.startsWith('amber_')) total += (localStorage[k]||'').length * 2; }
+    const kb = (total / 1024).toFixed(1);
+    const count = chats.length;
+    document.getElementById('storage-info').textContent = `${count} conversation${count!==1?'s':''} · ${kb} KB used`;
+  } catch(e) { document.getElementById('storage-info').textContent = 'Unable to calculate'; }
+}
+
+// Clear all chats
+function clearAllChats() {
+  if (!confirm('Delete all conversations? This cannot be undone.')) return;
+  chats = []; chatListEl.innerHTML = ''; foldersEl.innerHTML = ''; folders = [];
+  saveChats(); saveFolders();
+  const first = createChat(new Date().toLocaleDateString('en',{month:'long',day:'numeric'}));
+  renderChatItem(first); switchChat(first.id);
+  updateStorageInfo();
+  showToast('🗑 All conversations cleared');
+}
+
+// Reset settings
+function resetSettings() {
+  if (!confirm('Reset all settings to defaults?')) return;
+  applyTheme('dark', document.querySelector('.theme-opt[data-theme="dark"]'));
+  applyAccent('#e8a44a', document.querySelector('.accent-opt[data-color="#e8a44a"]'));
+  applyFontSize(15, document.querySelector('.size-opt[data-size="15"]'));
+  applyMsgWidth(780, document.querySelector('.size-opt[data-width="780"]'));
+  applyTypingSpeed(12, document.querySelector('.size-opt[data-speed="12"]'));
+  showTimestamps = false; compactSidebar = false; enterToSend = true; showLabels = true;
+  document.getElementById('s-timestamps').checked = false;
+  document.getElementById('s-compact').checked = false;
+  document.getElementById('s-enter').checked = true;
+  document.getElementById('s-labels').checked = true;
+  document.getElementById('s-speech-rate').value = 1;
+  document.getElementById('rate-val').textContent = '1.0×';
+  aiName = 'Amber'; wakePhrase = 'hey amber';
+  document.getElementById('s-name').value = 'Amber';
+  document.getElementById('s-wake').value = 'Hey Amber';
+  document.getElementById('logo-text').textContent = 'Amber';
+  inputEl.placeholder = 'Message Amber…';
+  saveUIPrefs();
+  showToast('↺ Settings reset to defaults');
+}
+
+// ── SETTINGS OPEN/CLOSE ─────────────────────────────────────────────────────
 function openSettings() {
+  // Populate fields with current state
   document.getElementById('s-name').value  = aiName;
   document.getElementById('s-wake').value  = wakePhrase.charAt(0).toUpperCase() + wakePhrase.slice(1);
   document.getElementById('s-persona').value = persona;
+  document.getElementById('s-timestamps').checked = showTimestamps;
+  document.getElementById('s-compact').checked = compactSidebar;
+  document.getElementById('s-enter').checked = enterToSend;
+  document.getElementById('s-labels').checked = showLabels;
+  document.getElementById('s-speech-rate').value = speechRate;
+  document.getElementById('rate-val').textContent = speechRate.toFixed(1) + '×';
+  document.getElementById('s-autovoice').checked = autoVoice;
+  // mark active theme/accent/size
+  document.querySelectorAll('.theme-opt').forEach(b => b.classList.toggle('active', b.dataset.theme === currentTheme));
+  document.querySelectorAll('.accent-opt').forEach(b => b.classList.toggle('active', b.dataset.color === currentAccent));
+  document.querySelectorAll('.size-opt[data-size]').forEach(b => b.classList.toggle('active', parseInt(b.dataset.size) === currentFontSz));
+  document.querySelectorAll('.size-opt[data-width]').forEach(b => b.classList.toggle('active', parseInt(b.dataset.width) === currentMsgW));
+  document.querySelectorAll('.size-opt[data-speed]').forEach(b => b.classList.toggle('active', parseInt(b.dataset.speed) === typingSpeed));
   voices = window.speechSynthesis.getVoices(); populateVoiceSelect();
   if (selectedVoice !== null) document.getElementById('s-voice').value = selectedVoice;
+  switchSettingsTab('appearance');
   document.getElementById('settings-overlay').classList.add('open');
 }
 function closeSettings() { document.getElementById('settings-overlay').classList.remove('open'); }
-function applyPrefsObj(s) {
-  if (s.aiName) aiName = s.aiName;
-  if (s.wakePhrase) wakePhrase = s.wakePhrase;
-  if (s.persona) persona = s.persona;
-  selectedVoice = s.selectedVoice !== undefined ? s.selectedVoice : null;
-  document.getElementById('logo-text').textContent = aiName;
-  inputEl.placeholder = `Message ${aiName}…`;
-  document.getElementById('welcome-wake').textContent = `"Hey ${aiName}"`;
-}
+
+// ── SAVE SETTINGS ───────────────────────────────────────────────────────────
 function doSaveSettings() {
   const newName = document.getElementById('s-name').value.trim() || 'Amber';
   const newWake = document.getElementById('s-wake').value.trim() || ('Hey ' + newName);
   const newPers = document.getElementById('s-persona').value.trim() || persona;
   const vi = document.getElementById('s-voice').value;
   selectedVoice = vi !== '' ? parseInt(vi) : null;
+  speechRate = parseFloat(document.getElementById('s-speech-rate').value) || 1.0;
+  autoVoice  = document.getElementById('s-autovoice').checked;
   aiName = newName; wakePhrase = newWake.toLowerCase(); persona = newPers;
   document.getElementById('logo-text').textContent = aiName;
   inputEl.placeholder = `Message ${aiName}…`;
   document.getElementById('welcome-wake').textContent = `"${newWake}"`;
-  updateWelcomeTitle(); savePrefs(); closeSettings();
+  updateWelcomeTitle();
+  // Update all sender labels
+  document.querySelectorAll('.ai-sender-label').forEach(l => l.textContent = aiName);
+  savePrefs(); saveUIPrefs(); closeSettings();
+  showToast('✓ Settings saved');
+}
+
+// UI prefs persistence
+function saveUIPrefs() {
+  try {
+    localStorage.setItem('amber_ui', JSON.stringify({ currentTheme, currentAccent, currentFontSz, currentMsgW, showTimestamps, compactSidebar, enterToSend, showLabels, typingSpeed, speechRate, autoVoice }));
+  } catch(e) {}
+}
+function loadUIPrefs() {
+  try {
+    const r = localStorage.getItem('amber_ui'); return r ? JSON.parse(r) : null;
+  } catch(e) { return null; }
+}
+function applyUIPrefs(p) {
+  if (p.currentTheme)  applyTheme(p.currentTheme, document.querySelector(`.theme-opt[data-theme="${p.currentTheme}"]`));
+  if (p.currentAccent) applyAccent(p.currentAccent, document.querySelector(`.accent-opt[data-color="${p.currentAccent}"]`));
+  if (p.currentFontSz) applyFontSize(p.currentFontSz, document.querySelector(`.size-opt[data-size="${p.currentFontSz}"]`));
+  if (p.currentMsgW)   applyMsgWidth(p.currentMsgW, document.querySelector(`.size-opt[data-width="${p.currentMsgW}"]`));
+  if (p.typingSpeed !== undefined) { typingSpeed = p.typingSpeed; document.querySelectorAll('.size-opt[data-speed]').forEach(b => b.classList.toggle('active', parseInt(b.dataset.speed) === typingSpeed)); }
+  if (p.showTimestamps !== undefined) { showTimestamps = p.showTimestamps; }
+  if (p.compactSidebar !== undefined) { compactSidebar = p.compactSidebar; document.body.classList.toggle('compact-sidebar', compactSidebar); }
+  if (p.enterToSend !== undefined) enterToSend = p.enterToSend;
+  if (p.showLabels !== undefined) showLabels = p.showLabels;
+  if (p.speechRate !== undefined) speechRate = p.speechRate;
+  if (p.autoVoice !== undefined) autoVoice = p.autoVoice;
 }
 
 function exportChats() {
